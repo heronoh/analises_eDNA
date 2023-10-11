@@ -18,12 +18,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
 
-#load project env and Rmd necessary libs
-# load(file = "~/analises_eDNA/eConservation/ .RData")
-
-```
 
 
  <font size="0.5">**This pipeline integrates public tools available for metagenomic analyses. To share or reproduce this content, please require authors' consent.**  
@@ -52,7 +47,8 @@ c) other columns for any metadata available.
 
 ### Prepare analyses working directory
 
-```{bash, eval=FALSE}
+
+```bash
 # 1 - creat a folder for all analyses files 
 
   #optionally, create the folders and paths as you want
@@ -71,7 +67,8 @@ mkdir -p $PRJCT_DIR;
 
 This part is only required if your read files is on Basespace. If the read files are already downloaded, proceed to the next section.
 
-```{bash, eval=FALSE, echo=TRUE}
+
+```bash
 # 1 - create and navigate to run files folder
 mkdir ~/analises_eDNA/eConservation;
 
@@ -109,7 +106,8 @@ ls $RAW_DATA/raw;
 
 ### Quality checking
 
-```{bash, eval=FALSE}
+
+```bash
 # 1 - creat folder for quality checking files
 
 mkdir $PRJCT_DIR/quality;
@@ -142,7 +140,8 @@ Now with quality assessment done, we will proceed into quality filtering, sample
 
 #### Load  R libs
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 # 0 - load libraries and other programs ----
 {
   library(dplyr)
@@ -175,7 +174,8 @@ Here we will define a single project folder, and the pipeline will create the ne
 Only the this main project folder has to be edited on the code bellow.
 
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 # 1 - create and set output and input paths ----
 
   # use the same path you created on the bash $PRJCT_DIR variable
@@ -257,7 +257,6 @@ Only the this main project folder has to be edited on the code bellow.
 }
 
 list.files(analysis_path)
-
 ```
 
 
@@ -266,7 +265,8 @@ list.files(analysis_path)
 
 ## Check samples
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 # load primers indexes and samples table
 
 ## This is the most impotant input on the anlaysis
@@ -329,8 +329,6 @@ dplyr::select(primers_n_samples,c("Primer FWD_name","Primer REV_name","Lib")) %>
 
 
 primers_n_samples$File_name[select(primers_n_samples,c("Primer FWD_name","Primer REV_name")) %>% unite(col = "col",sep = "-") %>% duplicated() %>% which()]
-
-
 ```
 
 
@@ -339,8 +337,8 @@ primers_n_samples$File_name[select(primers_n_samples,c("Primer FWD_name","Primer
 
 To avoid merging reads that did no come from the same cluster, we must check read pairing and remove unpaired (mandatory on DADA2).
 
-```{r, eval=FALSE,echo=TRUE}
 
+```r
 #list files
 # colnames(primers_n_samples)[colnames(primers_n_samples) == "Paired data path"] <- "Raw data path"
 all_fnFs <- sort(list.files((primers_n_samples$`Raw data path` %>%  unique()), 
@@ -735,8 +733,6 @@ all_filtered_out_wide$Unique_File_name[all_filtered_out_wide$Unique_File_name %>
 
 
 base::save.image(paste0(analysis_path,"/",prjct_rad,"-env_",Sys.Date(),"_repaired.RData"))
-
-
 ```
 <br>
 
@@ -747,7 +743,8 @@ Here we set the raw reads files  and the .csv table containing the informations 
 
 This table must have the columns **Sample**, **Primer** and **Unique_File_name**. This last one must identify uniquely the samples, withe the prefix radicals correspondent to their respective R1 and R2 read files.
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 primers_n_samples$Unique_File_name %>% paste0(collapse = '","') %>% cat()
 primers_n_samples$Unique_File_name %>% paste0(collapse = '","') %>% cat()
 
@@ -756,7 +753,6 @@ primers_n_samples$Unique_File_name %>% paste0(collapse = '","') %>% cat()
 sample_levels <- c( primers_n_samples$Unique_File_name)
 
 }
-
 ```
 
 <br>
@@ -765,8 +761,8 @@ sample_levels <- c( primers_n_samples$Unique_File_name)
 
 We will now create, from the samples table, another table to organize reads files and samples, with columns pointing to the reads files at every step of quality control and filtering. 
 
-```{r, eval=FALSE,echo=TRUE}
 
+```r
 # 3 - Map sample names to reads files ----
 
 
@@ -787,14 +783,14 @@ sample_idx_tbl <- sample_idx_tbl_wide %>%
 
 
 sample_idx_tbl$`Read file` %>% unique()
-
 ```
 
 <br>
 
 #### Identify primers on the original sequences
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 #1 - identify primers ----
 
 sample_idx_tbl$Primer %>% unique()
@@ -848,7 +844,8 @@ primers
 
 The function _allOrients_ is used to generate all possible orientations for primers FWD e REV.
 
-```{r eval=FALSE,echo=TRUE}
+
+```r
 # 1 - generate all possible primer orientations ----
 
 #function to get all possible primer orientations ----
@@ -905,7 +902,8 @@ primers_all_orients$Sequence
 
 Before primer removal it is possible to count their presence on the reads. This procedures is carried on independently for each sample. The following example applies to the first samples of each primer sample set.
 
-```{r eval=FALSE}
+
+```r
 # 1 - prepare to count primer orientation hits ----
 
 # 1a - Load required functions ----
@@ -994,12 +992,12 @@ primers_in_Nreads <- primers_in_Nreads %>%
 rownames(primers_in_Nreads) <- primers_in_Nreads$Unique_File_name_Read
 
 primers_in_Nreads$`Read file`
-
 ```
 
 #### Plot primers identified in each library
 
-```{r, echo=TRUE,eval=FALSE}
+
+```r
 #8 - prepare primer counts for plots in ggplot----
 
 primers_all_orients$`Orientation name`
@@ -1104,7 +1102,8 @@ The **_cutadapt_** software ([DOI:10.14806/ej.17.1.200](http://journal.embnet.or
 
 #### Generate and execute primer-specific commands
 
-```{r eval=FALSE}
+
+```r
 # optional: remove all primers from all reads and samples ----
 
 sample_idx_tbl$Stage %>% unique()
@@ -1188,13 +1187,12 @@ COI_3primers_fnFs.paired <- sample_idx_tbl$`Read file`[sample_idx_tbl$Stage == "
 COI_3primers_fnRs.paired <- sample_idx_tbl$`Read file`[sample_idx_tbl$Stage == "FWD_R2_paired"& sample_idx_tbl$Primer == "VF2_FR1d;Fish1;Fish2"]
 
 }
-  
 ```
   
 #### Identify primer specific read files 
 
-```{r eval=FALSE}
 
+```r
 # Run Cutadapt
 
 # COI_3primers ----
@@ -1204,14 +1202,14 @@ system2(cutadapt, args = c(COI_3primers_R1.flags, COI_3primers_R2.flags, "-j 70"
 COI_3primers_fnFs.paired[i], COI_3primers_fnRs.paired[i],  # input files
 "--minimum-length 10 --discard-untrimmed")) # guarantee no zerolength reads
 }
-
 ```
 
 <br>
 
 ### Identify error rates intrinsic to sequencing
 
-```{r, eval=FALSE}
+
+```r
 # 13 - learn error rates ----
 
 # must be performed independently for diferent sequencing runs !
@@ -1242,7 +1240,6 @@ length(all_fnRs.paired)
 # errors in R2 reads ----
   all_errR <- learnErrors(fls = all_fnRs.paired,
                                multithread=TRUE,randomize = TRUE)
-
 ```
 
 <br>
@@ -1251,7 +1248,8 @@ length(all_fnRs.paired)
 
 On this step each library is reduced to its unique composing sequences and their counts.
 
-```{r, eval=FALSE}
+
+```r
 # 14 - dada dereplication ----
 #           !!!!!!!!!!!!!!!!!!!! must be performed separately per sequencing run
 # #all ----
@@ -1261,7 +1259,6 @@ On this step each library is reduced to its unique composing sequences and their
 
         all_derep_forward[13]
         all_derep_reverse[13]
-
 
         all_dadaFs <- dada(all_derep_forward, err=all_errF, multithread=TRUE)
         all_dadaRs <- dada(all_derep_reverse, err=all_errR, multithread=TRUE)
@@ -1274,7 +1271,8 @@ On this step each library is reduced to its unique composing sequences and their
 
 On this step the forward an reverse reads are merged, by overlap, in order to reconstruct the insert full sequence.
 
-```{r, eval=FALSE}
+
+```r
 # 15 - merge read pairs ----
 # #merging ----
         all_mergers <- mergePairs(dadaF = all_dadaFs,
@@ -1339,7 +1337,6 @@ R2_seqtab <- makeSequenceTable(samples = all_dadaRs)
 #atenção. tem que inverter o R2 pra somar as tabelas aqui, antes do merge!!!!!!!!!!!
       colnames(run_mergers_REV_seqtab) <- dada2:::rc(colnames(run_mergers_REV_seqtab))
 
-
       run_mergers_ALL_seqtab <- sumSequenceTables(table1 = run_mergers_FWD_seqtab, table2 = run_mergers_REV_seqtab)
  
       
@@ -1370,7 +1367,6 @@ seq2_mergers_REV_seqtab <- makeSequenceTable(samples = seq2_mergers_REV)
 
 #atenção. tem que inverter o R2 pra somar as tabelas aqui, antes do merge!!!!!!!!!!!
       colnames(seq2_mergers_REV_seqtab) <- dada2:::rc(colnames(seq2_mergers_REV_seqtab))
-
 
       # seq2_mergers_ALL_seqtab <- sumSequenceTables(table1 = seq2_mergers_FWD_seqtab, table2 = seq2_mergers_REV_seqtab)
       seq2_mergers_ALL_seqtab <- seq2_mergers_FWD_seqtab
@@ -1419,7 +1415,6 @@ str(all_seqtab)
 # Inspect distribution of sequence lengths
 table(nchar(getSequences(all_seqtab)))
 table(nchar(getSequences(all_seqtab))) %>% plot() #size distribution of the ASVs
-
 ```
 
 <br>
@@ -1428,7 +1423,8 @@ table(nchar(getSequences(all_seqtab))) %>% plot() #size distribution of the ASVs
 
 _Chimeras_ are artificial read pairs that might have been generated erroneously on sequencing. The **DADA2** package estimates the probability of a sequence to be chimeric given the abundancy of its parental sequnces. After chimeric sequences removal, the remaining ASVs length distribution is assessed. On further steps it will be used to restrict analisys to ASVs compatible with each primer amplicons' length interval, in order to keep of unexpected ASVs.
 
-```{r, eval=FALSE}
+
+```r
 # 16 - remove chimeras ----
 
 
@@ -1455,7 +1451,6 @@ table(nchar(getSequences(all_seqtab.nochim))) %>% plot()
 
                                                                                                                                                                                                                                                                                                                                                                                                                                                             View(all_seqtab.nochim)
 dim(all_seqtab.nochim)
-
 ```
 <br>
 
@@ -1467,8 +1462,8 @@ On this step the ASVs identified by the **DADA2** pipeline, jointly for all libr
 
 
 #Exact species
-```{r, eval=FALSE}
 
+```r
 #19 - classify taxonomy exactly ----
 
 str(mergers_seqtab)
@@ -1486,8 +1481,6 @@ mergers_sps <- dada2::assignSpecies(seqs = mergers_seqtab.nochim,allowMultiple =
                                n = 20000,
                                verbose = TRUE)
 
-
-
       R1_sps <- dada2::assignSpecies(seqs = R1_seqtab.nochim,allowMultiple = 10,
                                # refFasta =  "~/prjcts/fish_eDNA/data/refs/db/LGC/12S_BOLD_species.fasta",
                                refFasta =  "~/prjcts/fish_eDNA/data/refs/db/BOLD/BOLD_dada_tax_Sp.fasta",
@@ -1501,11 +1494,11 @@ mergers_sps <- dada2::assignSpecies(seqs = mergers_seqtab.nochim,allowMultiple =
                                tryRC=TRUE,
                                n = 20000,
                                verbose = TRUE)
-     
 ```
 
 # Unexact species or other taxonomic ranks
-```{r, eval=FALSE}
+
+```r
 #20 - classify taxonomy ----
 sample_names(all_taxa)
 
@@ -1586,7 +1579,6 @@ mergers_csv_IDs <- mergers_csv_taxa %>%
 
 #Save env
    base::save.image("~/analises_eDNA/eConservation/env-_7-MiFish-08fev23.RData")
-
 ```
 
 
@@ -1594,7 +1586,8 @@ mergers_csv_IDs <- mergers_csv_taxa %>%
 
 ### Count reads and remaining ASVs
 
-```{r, eval=FALSE}
+
+```r
 # 17 - count reads proportion throughout the pipeline ----
 getN <- function(x) sum(getUniques(x))
 
@@ -1642,7 +1635,6 @@ colnames(R2_seqtab.nochim) <- dada2:::rc(colnames(R2_seqtab.nochim)) # reverse-c
               R1_R2_seqtab.nochim <- sumSequenceTables(table1 = R1_seqtab, table2 = R2_seqtab)
               
               dim(R1_R2_seqtab.nochim)
-
 
               
 
@@ -1759,7 +1751,6 @@ ggsave(file = paste0(figs_path,"/",prjct_rad,"-samples_track.pdf",collapse = "")
      height = 50,
      units = "cm",
      dpi = 120)
-
 ```
 
 
@@ -1779,7 +1770,8 @@ On this step the ASVs associated to taxonomic ranks by **DADA2** and their respe
 
 Here the experiment metadata is associated to each sample.
 
-```{r, eval=FALSE}
+
+```r
 # 22 - create sample table ----
 
 primers_n_samples %>% colnames()
@@ -1809,7 +1801,8 @@ This sample metadata table was created with the information available for the sa
 
 ### **Phyloseq** data interpretation
 
-```{r, eval=FALSE}
+
+```r
 #23 - interpret dada on phyloseq ----
 rownames(samdf)
 str(samdf)
@@ -1831,7 +1824,6 @@ R1_ps <- phyloseq::phyloseq(phyloseq::otu_table(R1_seqtab.nochim, taxa_are_rows 
 R2_ps <- phyloseq::phyloseq(phyloseq::otu_table(R2_seqtab.nochim, taxa_are_rows = FALSE),
                             phyloseq::sample_data(samdf),
                             phyloseq::tax_table(R2_taxa$tax))
-
 ```
 
 
@@ -1841,7 +1833,8 @@ R2_ps <- phyloseq::phyloseq(phyloseq::otu_table(R2_seqtab.nochim, taxa_are_rows 
 
 Many different graphics can be generated, together or in isolation, for all primers/libraries and taxonomic ranks.
 
-```{r, eval=FALSE}
+
+```r
 #24 - merge ps analisys ----
 # combine all pyloseq objects in one
 # by doing so, all ASVs will be combined and some will have 0 abundance
@@ -1883,13 +1876,13 @@ colnames(mergers_ps_tbl)
 
 # here we would bind the tables generated for R1, R2 and concatenated ASVs, if existing
 all_ps_tbl <- mergers_ps_tbl
-
 ```
 
 
 #calculate sample abundances ----
 
-```{r, eval=FALSE, echo=TRUE}
+
+```r
 {
   all_ps_tbl <- all_ps_tbl %>%
   mutate("Relative abundance to all samples" = 0,
@@ -1905,13 +1898,12 @@ all_ps_tbl <- mergers_ps_tbl
     ungroup()
 
 }
-
 ```
 
 # check ASVs legths pre BLAST
 
-```{r, eval=FALSE}
 
+```r
 all_ps_tbl <- all_ps_tbl %>%
   mutate("ASV Size (pb)" = nchar(ASV))
 
@@ -1955,10 +1947,6 @@ ggsave(file = paste0(figs_path,"/",prjct_rad,"-ASV_length_by_sample-ALL-ASVs-IDs
      height = 50,
      units = "cm",
      dpi = 600)
-
-
-
-
 ```
 
 
@@ -1971,7 +1959,8 @@ ggsave(file = paste0(figs_path,"/",prjct_rad,"-ASV_length_by_sample-ALL-ASVs-IDs
 
 #BLASTn identification
 
-```{r, eval=FALSE}
+
+```r
 # blastn ----
 ## Annotate all ASVs by blastN
 ### select ASVs for BLASTn search ----
@@ -2034,8 +2023,8 @@ blast_res_full <- bind_rows(blast_res_1) %>%
 
 
 ### retrieving complete taxonomies for blast res
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 blast_res_full$`1_subject header` %>% unique() %>% sort()
 
 
@@ -2155,8 +2144,6 @@ blast_res_full$`blast ID`[blast_res_full$`blast ID` %in% c("Human DNA","Eukaryot
   
   
   blast_res_full %>% filter(`blast ID` %in% c(" ")) %>% View()
-  
-
 ```
 
 
@@ -2164,7 +2151,8 @@ blast_res_full$`blast ID`[blast_res_full$`blast ID` %in% c("Human DNA","Eukaryot
 
 ### Retrieve complete taxonomy (when possible) 
 
-```{r,echo=TRUE, eval=FALSE}
+
+```r
 # greate a genus colum to be able to join tax results
 
 
@@ -2370,14 +2358,12 @@ blast_res_full %>% colnames()
 
 # saveRDS(object = blast_res_tax,file = "~/refs/COIr1_blast_res_tax_27969seqs.rds")
 saveRDS(object = blast_res_tax,file = "~/COIr1_blast_res_tax_25434seqs.rds")
-
 ```
 
 #combine BLAST and DADA2 results ----
 
-```{r, eval=FALSE, echo=TRUE}
 
-
+```r
 colnames(blast_res_tax)[colnames(blast_res_tax) == "OTU"] <- "ASV"
 
 
@@ -2388,14 +2374,13 @@ all_ps_tbl_blast <- left_join(x = all_ps_tbl,y = blast_res_tax,by = "ASV")
 
 # all_ps_tbl_blast_bckp <- all_ps_tbl_blast
 # all_ps_tbl_blast <- all_ps_tbl_blast_bckp
-
-
-``` 
+```
 
 
 # Remove uninformative columns from complete results table
 
-```{r,echo=TRUE, eval=FALSE}
+
+```r
 # If the identifications did not use DADA2 results, remove corresponding columns to make files and tables lighter
 
 
@@ -2436,18 +2421,15 @@ all_ps_tbl_blast <- all_ps_tbl_blast %>%
 # novo local de entrada da taxonomia do DADA2
 all_ps_tbl_blast <- all_ps_tbl_blast %>%
   left_join(y = mergers_csv_IDs, by = "ASV")
-
-
-
-``` 
+```
 
 
 
 
 # Final ID 
 
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 #all_ps_tbl_blast_bckp2 <- all_ps_tbl_blast
 #all_ps_tbl_blast <- all_ps_tbl_blast_bckp2 
 
@@ -2488,12 +2470,12 @@ all_ps_tbl_blast$`Final ID (BLASTn)` %>% unique() %>%  sort()
 
 colnames(all_ps_tbl_blast)[colnames(all_ps_tbl_blast) == "ASV"] <- "ASV (Sequence)"
 # names(all_ps_tbl_blast)[which(names(all_ps_tbl_blast)== "ASV length")] <- "ASV Size (pb)"
-
 ```
 
 ### ASVs seqs
 
-```{r,echo=TRUE, eval=FALSE}
+
+```r
 #25 - recover all ASVs sequences to prepare fasta ----
 
 #all ----
@@ -2554,14 +2536,12 @@ all_ps_tbl_blast[all_ps_tbl_blast %>% duplicated(),]
 all_ps_tbl_blast$Abundance %>% table()  %>%  plot()
 all_ps_tbl_blast$`Relative abundance on sample` %>% table() %>%  plot()
 all_ps_tbl_blast$`ASV Size (pb)` %>% table() %>%  plot()
-
 ```
 
 ###SWARM - ASVs to OTUs
 
-```{r,echo=TRUE, eval=FALSE}
 
-
+```r
 asvs_abd <- all_ps_tbl_blast %>%
   dplyr::select(c("ASV (Sequence)","ASV header","Abundance")) %>% 
   group_by(`ASV (Sequence)`,`ASV header`) %>%
@@ -2576,15 +2556,12 @@ all_asv_fasta_abd <- c(rbind(asvs_abd$`ASV header abd`, asvs_abd$`ASV (Sequence)
 write(all_asv_fasta_abd, paste0(results_path,"/",prjct_rad,"-ASVs_abd.fasta"))
 
 paste0(results_path,"/",prjct_rad,"-ASVs_abd.fasta")
-
-
-
-
 ```
 
 #### Run SWARM V2 on command line
 
-```{r ,echo=TRUE, eval=FALSE}
+
+```r
 # 1 - move to swarm folder
 
 cd $PRJCT_DIR/results/swarm
@@ -2659,15 +2636,13 @@ all_ps_tbl_blast %>% dplyr::select(`Final ID (BLASTn)`,OTU,`ASV length`) %>% uni
 
 all_ps_tbl_blast %>% dplyr::select(`Final ID (BLASTn)`,OTU) %>% dplyr::select(OTU) %>% unique() 
 all_ps_tbl_blast %>% dplyr::select(`ASV (Sequence)`,`Final ID (BLASTn)`,OTU) %>% unique() 
-
-
 ```
 
 
 #Identify ASVs present on the Blanks/Negative controls
 
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 #corrigindo que na tabela os controles não foram importados
 
 all_ps_tbl_blast$Sample %>% unique()
@@ -2821,14 +2796,13 @@ all_ps_tbl_blast_controls %>%
 all_ps_tbl_blast$`ASV (Sequence)` %>%  unique()
 all_ps_tbl_blast$Sample %>%  table()
 all_ps_tbl_blast$Remove %>%  table()
-
 ```
 
 
 ## plot identified ASVs
 
-```{r, eval=FALSE}
 
+```r
 all_ps_tbl_blast_controls$`Superkingdom (BLASTn)` %>% unique()
 
 
@@ -2912,14 +2886,13 @@ ASV_legth_by_Sample_BLAST_plotly <- ASV_legth_by_Sample_BLAST %>% ggplotly(toolt
 htmlwidgets::saveWidget(widget = ASV_legth_by_Sample_BLAST_plotly,
                 selfcontained = TRUE,
                         file = paste0(figs_path,"/",prjct_rad,"-ASVs_BLASTn_IDed_interactive_Cliente_ICMBio.html"))
-
 ```
 
 
 
 #ASV expected length per primer
-```{r, eval=FALSE, echo=TRUE}
 
+```r
 # all_ps_tbl_blast_controls_bckp <- all_ps_tbl_blast_controls
 # all_ps_tbl_blast_controls <- all_ps_tbl_blast_controls_bckp
 
@@ -2944,7 +2917,6 @@ mutate(`Expected length` = case_when((Primer %in%  "VF2_FR1d;Fish1;Fish2" & `ASV
 
 
 all_ps_tbl_blast_controls %>% colnames() %>% sort()
-
 ```
 
 ## Set curated ID
@@ -2952,8 +2924,8 @@ all_ps_tbl_blast_controls %>% colnames() %>% sort()
 
 The curated identification is obtained by manually (but programatically) correcting species based on biological scientific expertise, or species names that are uncorrect. 
 
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 all_ps_tbl_blast_controls <- all_ps_tbl_blast_controls %>% 
   # mutate(`Final ID ` = unfactor(`Final ID `)) %>% 
   mutate("Curated ID" = `Final ID (BLASTn)`)
@@ -2978,8 +2950,8 @@ all_ps_tbl_blast_controls %>% select(`Curated ID`,OTU,Remove) %>% unique() %>% V
 
 #Reorder table
 
-```{r, eval=FALSE}
 
+```r
 # all_ps_tbl_blast_controls_bckp2<- all_ps_tbl_blast_controls
 # all_ps_tbl_blast_controls <- all_ps_tbl_blast_controls_bckp2
 
@@ -3160,18 +3132,12 @@ all_ps_tbl_blast_controls <- all_ps_tbl_blast_controls %>%
 
 all_ps_tbl_blast_controls %>% filter(`Possible Metazoa` %in% c(NA,"NA")) %>% View()
 all_ps_tbl_blast_controls %>% filter(`Possible Metazoa` %in% c(FALSE)) %>% View()
-
-
-
-
-
-
 ```
 
 ##save complete table
 
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 # reload metadata if needed----
 
 
@@ -3282,14 +3248,13 @@ writexl::write_xlsx(
                     path = paste0(results_path,"/",prjct_rad,"-todas_info_da_analise_",Sys.Date(),".xlsx"),
                     # path = paste0(results_path,"/",prjct_rad,"-complete_analysis_results-_7_MiBird-",Sys.Date(),".xlsx"),
                     col_names = TRUE,format_headers = TRUE)
-
 ```
 
 
 ### Save ASV Vs. Samples table
 
-```{r,echo=TRUE, eval=FALSE}
 
+```r
 # generate ASVs Vs. Samples table from complete table ----
 
 #function to either sum or unique by column type ----
@@ -3432,13 +3397,13 @@ dim(smp_abd_ID_eco)
 dim(smp_abd_ID_eco_ID)
 
 colnames(smp_abd_ID_eco) %>% paste0(collapse = '",\n"') %>% cat()
-
 ```
 
 
 # Reload results table after curation
 
-```{r,echo=TRUE, eval=FALSE}
+
+```r
 curated_smp_abd_ID <- smp_abd_ID
 
 
@@ -3447,13 +3412,13 @@ curated_smp_abd_ID <- smp_abd_ID
 
 colnames(smp_abd_ID_DAN)
 colnames(curated_IDs_tbl)
-
 ```
 
 
 # Plot ASVs and samples heatmap
 
-```{r eval=FALSE,echo=TRUE}
+
+```r
 scales::show_col(viridis::turbo(n=10))
 
 options(scipen = 500,digits = 2)
@@ -3553,8 +3518,9 @@ smp_abd_ID %>%
 
 
 ### Ploting ASVs
+```
 
-```{r, eval=FALSE}
+```r
 #28- ASVs plots by sample and species ----
 
 
@@ -3614,7 +3580,6 @@ ASV_legth_by_Sample <- smp_abd_ID %>%
 
 
 ASV_legth_by_Sample
-
 ```
 
 
@@ -3626,7 +3591,8 @@ ASV_legth_by_Sample
 
 ### NMDS
 
-```{r, eval=FALSE,echo=TRUE}
+
+```r
 library(vegan)
 
 colnames(smp_abd_ID)
@@ -3685,7 +3651,6 @@ all_IDs_NMDS_tbl %>% select(Sample_name_read, `Sample number`) %>% unique()
 
 #3- create data.frame of species counts: rownames are Sample numbers ----
 
-
     colnames(smp_abd_ID)
     
     all_IDs_NMDS_tbl 
@@ -3733,7 +3698,6 @@ colnames(all_IDs_NMDS_df)[12:71] %>% sort()
 library(vegan)
 
    is.numeric(all_IDs_NMDS_df[,12:71])
-
 
         all_IDs_NMDS_df <- all_IDs_NMDS_df  %>% 
   filter_all(any_vars(. != 0))
@@ -3841,7 +3805,6 @@ writexl::write_xlsx(x = all_IDs_NMDS_df,
 
 library(factoextra)
 library(ggforce)
-
 ```
 
 #References
