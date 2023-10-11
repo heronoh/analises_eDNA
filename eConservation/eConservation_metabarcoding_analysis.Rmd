@@ -1,5 +1,5 @@
 ---
-title: "MCTI Miseq240323 metabarcoding analysis"
+title: " eConservation metabarcoding analysis"
 author: 
   - "Hilário, OH"
   - "Carvalho, DC"
@@ -32,7 +32,7 @@ editor_options:
 # Short introduction
 
   
-Welcome! We will guide you trought the analysis of fish environmental eDNA from MCTI samples, between the municipalities of Patos de Minas and Anhanguera. The samples were amplified  using the multiple primers .
+Welcome! We will guide you trought the analysis of fish environmental eDNA from  samples, between the municipalities of Patos de Minas and Anhanguera. The samples were amplified  using the multiple primers .
 
 To proceed you will need the raw reads files and a .csv file with: 
 
@@ -145,21 +145,21 @@ cutadapt -e 0.05 -j 20 --no-indels --max-n 0 \
  -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta \
  -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_AguaSoloMG/{name1}-{name2}.R1.fastq \
  -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_AguaSoloMG/{name1}-{name2}.R2.fastq \
-   /data/data_raw/ecomol/MCTI/EM112_MiBird_AguaSoloMG/raw/MiBird_Solo_Agua_MG_S1_L001_R1_001.fastq.gz \
-   /data/data_raw/ecomol/MCTI/EM112_MiBird_AguaSoloMG/raw/MiBird_Solo_Agua_MG_S1_L001_R2_001.fastq.gz \
+   /data/data_raw/ecomol//EM112_MiBird_AguaSoloMG/raw/MiBird_Solo_Agua_MG_S1_L001_R1_001.fastq.gz \
+   /data/data_raw/ecomol//EM112_MiBird_AguaSoloMG/raw/MiBird_Solo_Agua_MG_S1_L001_R2_001.fastq.gz \
  2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_AguaSoloMG/EM112_MiBird_AguaSoloMG-dmx_cut_e05_noNs.txt;
 
 
 #EM112_12Sv5_AguaSoloMG
-cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol/MCTI/EM112_12Sv5_AguaSoloMG/raw/12SV5_Solo_Agua_MG_S2_L001_R1_001.fastq.gz /data/data_raw/ecomol/MCTI/EM112_12Sv5_AguaSoloMG/raw/12SV5_Solo_Agua_MG_S2_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/EM112_12Sv5_AguaSoloMG-dmx_cut_e05_noNs.txt;
+cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol//EM112_12Sv5_AguaSoloMG/raw/12SV5_Solo_Agua_MG_S2_L001_R1_001.fastq.gz /data/data_raw/ecomol//EM112_12Sv5_AguaSoloMG/raw/12SV5_Solo_Agua_MG_S2_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_AguaSoloMG/EM112_12Sv5_AguaSoloMG-dmx_cut_e05_noNs.txt;
 
 
 
 #EM112_12Sv5_RJ
-cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol/MCTI/EM112_12Sv5_RJ/raw/12SV5_SoloAgua_RJ_S2_L001_R1_001.fastq.gz /data/data_raw/ecomol/MCTI/EM112_12Sv5_RJ/raw/12SV5_SoloAgua_RJ_S2_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/EM112_12Sv5_RJ-dmx_cut_e05_noNs.txt;
+cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_12SV5.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol//EM112_12Sv5_RJ/raw/12SV5_SoloAgua_RJ_S2_L001_R1_001.fastq.gz /data/data_raw/ecomol//EM112_12Sv5_RJ/raw/12SV5_SoloAgua_RJ_S2_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_12Sv5_RJ/EM112_12Sv5_RJ-dmx_cut_e05_noNs.txt;
 
 #EM112_MiBird_RJ
-cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_MiBird.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_MiBird.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol/MCTI/EM112_MiBird_RJ/raw/MiBird_SoloAgua_RJ_S1_L001_R1_001.fastq.gz /data/data_raw/ecomol/MCTI/EM112_MiBird_RJ/raw/MiBird_SoloAgua_RJ_S1_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/EM112_MiBird_RJ-dmx_cut_e05_noNs.txt;
+cutadapt -e 0.05 -j 20 --no-indels --max-n 0 -g file:~/prjcts/ecomol/primers_and_indexes/all_indexes_MiBird.fasta -G file:~/prjcts/ecomol/primers_and_indexes/all_indexes_MiBird.fasta -o ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/{name1}-{name2}.R1.fastq -p ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/{name1}-{name2}.R2.fastq   /data/data_raw/ecomol//EM112_MiBird_RJ/raw/MiBird_SoloAgua_RJ_S1_L001_R1_001.fastq.gz /data/data_raw/ecomol//EM112_MiBird_RJ/raw/MiBird_SoloAgua_RJ_S1_L001_R2_001.fastq.gz 2> ~/prjcts/ecomol/analyses/Miseq240323/dmux/EM112_MiBird_RJ/EM112_MiBird_RJ-dmx_cut_e05_noNs.txt;
 
 
 
@@ -2236,7 +2236,7 @@ mergers_csv_IDs <- mergers_csv_taxa %>%
   
 
 #Save env
-   base::save.image("~/prjcts/ecomol/analyses/Miseq240323/env-MCTI_7-MiFish-08fev23.RData")
+   base::save.image("~/prjcts/ecomol/analyses/Miseq240323/env-_7-MiFish-08fev23.RData")
 
 ```
 
@@ -2759,7 +2759,7 @@ ASV_legth_by_Sample <- all_ps_tbl %>%
   scale_color_manual(values = c(viridis::viridis(n=10)[c(3,6,9)]))+
   xlab("Tamanho da ASV (pb)") +
   ylab("Amostra") +
-  ggtitle(label = "Ecomol - iSeq16_03112022 - piloto MCTI",
+  ggtitle(label = "Ecomol - iSeq16_03112022 - piloto ",
           subtitle = "Distribution of ASVs size and Read originper Sample considering all identified ASVs") +
   theme_bw(base_size = 8) +
   theme(legend.position = "right")+
@@ -2920,7 +2920,7 @@ asvs_blast_all
 # blast_res_old3 <- readRDS(file = "/home/heron/prjcts/ecomol/analyses/EM112_SP_R1/results/blast/blast_out_res3.RDS")
 # blast_res_old4 <- readRDS(file = "/home/heron/prjcts/ecomol/analyses/EM112_SP_R1/results/blast/blast_out_res4.RDS")
 # blast_res_old5 <- readRDS(file = "/home/heron/prjcts/ecomol/analyses/EM112_SP_R1/results/blast/blast_out_res5.RDS")
-# blast_res_old6 <- readRDS(file = "/home/heron/prjcts/ecomol/analyses/iSeq16_03112022_CIAT_pilotoMCTI/COIr1_blast_res.RDS")
+# blast_res_old6 <- readRDS(file = "/home/heron/prjcts/ecomol/analyses/iSeq16_03112022_CIAT_piloto/COIr1_blast_res.RDS")
 # 
 # #
 # blast_res_0 <- bind_rows(blast_res_old1, blast_res_old2, blast_res_old3, blast_res_old4, blast_res_old5, blast_res_old6)
@@ -4536,7 +4536,7 @@ all_ps_tbl_blast_controls %>% filter(`Possible Metazoa` %in% c(FALSE)) %>% View(
 # all_ps_tbl_blast_controls_bckp3 <- all_ps_tbl_blast_controls
 # all_ps_tbl_blast_controls <- all_ps_tbl_blast_controls_bckp3
 
-                # metadata <- read.csv(file = paste0(data_path,"/","ecomol-MCTI_7-MiBird-primers_n_samples.csv"),
+                # metadata <- read.csv(file = paste0(data_path,"/","ecomol-_7-MiBird-primers_n_samples.csv"),
                 #                      check.names = F,
                 #                      header = TRUE) %>%
                 #   select(c("Unique_File_name", "Metadata 1", "Metadata 2", "Metadata 3", "Metadata 4", "Metadata 5", "obs"))
@@ -4683,7 +4683,7 @@ smp_abd_ID %>%
   # filter(Cliente %in% c("EcoMol")) %>% 
 writexl::write_xlsx(
                     path = paste0(results_path,"/",prjct_rad,"-todas_info_da_analise_",Sys.Date(),".xlsx"),
-                    # path = paste0(results_path,"/",prjct_rad,"-complete_analysis_results-MCTI_7_MiBird-",Sys.Date(),".xlsx"),
+                    # path = paste0(results_path,"/",prjct_rad,"-complete_analysis_results-_7_MiBird-",Sys.Date(),".xlsx"),
                     col_names = TRUE,format_headers = TRUE)
 
 ```
@@ -5271,7 +5271,7 @@ IDs_smpls_heat
 
 
 
-# ggsave(file = paste0(figs_path,"/",prjct_rad,"-MCTI-Sps_98blast_ASVs_abd005_noBAC-by_read_origin.pdf",collapse = ""),
+# ggsave(file = paste0(figs_path,"/",prjct_rad,"--Sps_98blast_ASVs_abd005_noBAC-by_read_origin.pdf",collapse = ""),
 ggsave(file = paste0(figs_path,"/",prjct_rad,"-EM124-EM125","-IDs_BLASTn_per_sample_FINAL.pdf",collapse = ""),
 # ggsave(file = paste0(figs_path,"/",prjct_rad,"-Genus98_found_in_samples.pdf",collapse = ""),
 # ggsave(file = paste0(figs_path,"/",prjct_rad,"-ASV_length_by_sample-ALL_ASVs.pdf",collapse = ""),
@@ -5458,7 +5458,7 @@ ASVs_N_DB_tree <- ape::njs(ASVs_N_DB_algn_sub_dist)
 ASVs_N_DB_tree$tip.label
 
 ape::write.tree(phy = ASVs_N_DB_tree,digits = 5,file =
-                  paste0(results_path,"/","MCTI_7-MiBird-Arvore_ASVs_12Sdb.nwk"))
+                  paste0(results_path,"/","_7-MiBird-Arvore_ASVs_12Sdb.nwk"))
 
 
 
@@ -5475,7 +5475,7 @@ library(ggtree)
 
 
 
-ASVs_N_DB_tree_nwck <- ggtree::read.tree(file = paste0(results_path,"/","MCTI_7-MiBird-Arvore_ASVs_12Sdb.nwk"))
+ASVs_N_DB_tree_nwck <- ggtree::read.tree(file = paste0(results_path,"/","_7-MiBird-Arvore_ASVs_12Sdb.nwk"))
 
 
 
@@ -5596,7 +5596,7 @@ ASV_legth_by_Sample <- smp_abd_ID %>%
                      labels=c("BLAST IDed","no ID")) +
   xlab("Tamanho da ASV (pb)") +
   ylab("Amostra") +
-  ggtitle(label = "Ecomol - MCTI_7-MiBird",
+  ggtitle(label = "Ecomol - _7-MiBird",
   # ggtitle(label = paste0("Ecomol - ",prjct_rad," - 16/03/2022"),
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nEXCLUINDO POSSÍVEIS BACTÉRIAS") +
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nCONSIDERANDO POSSÍVEIS BACTÉRIAS") +
@@ -5670,7 +5670,7 @@ ASV_legth_by_Sample <- smp_abd_ID %>%
                      labels=c("BLAST IDed","no ID")) +
   xlab("Tamanho da ASV (pb)") +
   ylab("Amostra") +
-  ggtitle(label = "Ecomol - MCTI_7-MiBird",
+  ggtitle(label = "Ecomol - _7-MiBird",
   # ggtitle(label = paste0("Ecomol - ",prjct_rad," - 16/03/2022"),
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nEXCLUINDO POSSÍVEIS BACTÉRIAS") +
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nCONSIDERANDO POSSÍVEIS BACTÉRIAS") +
@@ -5748,7 +5748,7 @@ ASV_legth_by_Smpl_Metadata 1 <- smp_abd_ID %>%
                      labels=c("BLAST IDed","no ID")) +
   xlab("Tamanho da ASV (pb)") +
   ylab("Amostra") +
-  ggtitle(label = "Ecomol - MCTI_7-MiBird",
+  ggtitle(label = "Ecomol - _7-MiBird",
   # ggtitle(label = paste0("Ecomol - ",prjct_rad," - 16/03/2022"),
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nEXCLUINDO POSSÍVEIS BACTÉRIAS") +
           # subtitle = "Distribuição de tamanho e origem das ASVs encontradas por amostra\nCONSIDERANDO POSSÍVEIS BACTÉRIAS") +
@@ -5920,7 +5920,7 @@ riqueza_Sample_BLASTn_bar <- smp_abd_ID %>%
   guides(col = guide_legend(nrow = 6)) +
   xlab("Amostra") +
   ylab("Riqueza de espécies") +
-  ggtitle(label = "Ecomol - MCTI_7-MiBird",
+  ggtitle(label = "Ecomol - _7-MiBird",
           subtitle = "Riqueza de identificações únicas por amostra com abd >= 0.5%: apenas Actinopteri") +
   theme_bw(base_size = 12) +
   theme(legend.position = "bottom")+
@@ -6220,7 +6220,7 @@ nmds_PLOT_ord <- ggord(all_ps_vegan_ord_meta,
 #               ylim = c(-1.3,1.3)) +
   scale_colour_manual(name = "Amostras", values = viridis::viridis(option = "turbo",n = 6, alpha = 1))+
   # scale_colour_manual(name = "Samples", values = colors_9) +
-  ggtitle(label = "LGC - MCTI_7-MiBird",
+  ggtitle(label = "LGC - _7-MiBird",
           subtitle = "NMDS das identificações por BLASTn")
   # labs(title='NEW LEGEND TITLE') +
 #   # labs(fill='NEW LEGEND TITLE') +
