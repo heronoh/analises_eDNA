@@ -1,0 +1,348 @@
+---
+title: "demultiplex metabarcoding analysis"
+author: 
+  - "Hilário, OH"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+output: 
+  html_document:
+    code_download: yes
+    df_print: paged
+    keep_md: yes
+    theme: flatly
+    toc: true
+    toc_depth: 5
+    toc_float: true
+  pdf_document: 
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+```
+
+
+ <font size="0.5">**This script integrates public tools available for eDNA metabarcoding analyses. To share or reproduce this content, please cite this page.**  
+**Contact:** heronoh@gmail.com</font> 
+
+# Short introduction
+
+  
+Welcome! We will guide you trough the analysis of environmental eDNA for the _demultiplex_ samples. It can deal with samples amplified using many dufferent primers.
+
+To proceed you will need the raw reads files and a .csv file with: 
+
+a) a column listing all samples, with _unique names_ (*Unique_File_name*) that will be assigned to the demultiplexes raw reads; 
+
+b) a column with the respective primer used for each sample (Primer); 
+
+c) two columns with indexes names (*Index name FWD*  and *Index name REV*)
+
+d) two columns with indexes sequences (*Index name FWD*  and *Index name REV*)
+
+
+# Bioinformatics
+
+## Set up
+
+### Load  R libs
+
+```{r, eval=FALSE,echo=TRUE}
+# 0 - load libraries and other programs ----
+{
+  library(tidyverse)
+  library(Biostrings)
+  library(ShortRead)
+  library(future)
+  library(ggplot2
+  library(ggpubr)
+  library(fs)
+  library(units)
+}
+
+# 1 - set path to cutadapt executable
+cutadapt <- "/usr/local/bin/cutadapt"
+```
+
+<br>
+
+### Set output and data paths
+
+Here we will define a single project folder, and the pipeline will create the necessary subfolders for results organization.
+Only the this main project folder has to be edited on the code bellow.
+
+```{r, eval=FALSE,echo=TRUE}
+# 1 - create and set output and input paths ----
+
+{
+    
+  #analysis name radical ----
+  analysis_rad <-c("demultiplex")
+
+  # the analysis folder ----
+  analysis_path <- "/home/heron/prjcts/2025/demultiplex"
+  
+  if(!dir.exists(analysis_path)){ 
+    dir.create(analysis_path)
+  }else{
+      print(paste0("The folder ", analysis_path, " already exists"))
+    }
+  
+  # create data_folder ----
+  data_path <- paste0(analysis_path,"/data")
+  if(!dir.exists(data_path)){ 
+    dir.create(data_path)
+  }else{
+      print(paste0("The folder ", data_path, " already exists"))
+    }
+  
+  #creat folders for the intermediate reads files ----
+  ## create a folder for all processed reads ----
+  pipe_libs <- paste0(data_path,"/reads")
+  if(!dir.exists(pipe_libs)){ 
+    dir.create(pipe_libs)
+  }else{
+      print(paste0("The folder ", pipe_libs, " already exists"))
+    }
+
+  ## create a folder  for dmx results ----
+  {
+  dmx_path <- paste0(pipe_libs,"/dmx")
+  if(!dir.exists(dmx_path)){ 
+    dir.create(dmx_path)
+  }else{
+      print(paste0("The folder ", dmx_path, " already exists"))
+    }
+  ## folder for dmx files  
+  if(!dir.exists(paste0(dmx_path,"/all_dmx"))){ 
+    dir.create(paste0(dmx_path,"/all_dmx"))
+  }else{
+      print(paste0("The folder ", paste0(dmx_path,"/all_dmx"), " already exists"))
+  }  
+ ## folder for combined files per sample 
+  if(!dir.exists(paste0(dmx_path,"/all_combined"))){ 
+    dir.create(paste0(dmx_path,"/all_combined"))
+    }else{
+      print(paste0("The folder ", paste0(dmx_path,"/all_combined"), " already exists"))
+    }
+  }
+
+list.files(analysis_path)
+```
+
+
+## Load Samples table
+
+This is the most important input on the analysis, along with the raw data. The _Samples Table_ holds the information of the samples file names, primers, controls, indexes, different projects. An example of this table can be found [here](https://docs.google.com/spreadsheets/d/1NoLrwmubmFdOFwA5LJ6DO08eUm-HwpjA5MgTw2mxS0M/edit?usp=sharing).
+
+After filling in the table, save it as .csv an place it on the data folder, inside the project's main directory.
+ 
+```{r, eval=FALSE,echo=TRUE}
+# load primers indexes and samples table ----
+primers_n_samples <- readr::read_csv(file = "~/prjcts/2025/demultiplex/exemplo--indexes_and_samples.csv") 
+
+```
+
+## Demultiplexing
+
+If your raw data is multiplexed, you must demultiplexed. The following session will do it using the information provided on you _Samples table_. If not, you can move to the next section.
+
+### Creat indexes fasta 
+
+```{r, eval=FALSE,echo=TRUE}
+
+primers_n_samples[primers_n_samples %>% 
+  dplyr::select(
+    "Index sequence FWD",
+    "Index sequence REV") %>% 
+  duplicated(),] %>% View()
+
+dmux_indexes <- primers_n_samples %>% 
+  dplyr::select(
+    "Primer",
+    "Index name FWD",
+    "Index sequence FWD",
+    "Index name REV",
+    "Index sequence REV"
+  ) %>% 
+  dplyr::filter(dplyr::if_all(dplyr::everything(), ~!is.na(.))) %>% 
+  tidyr::pivot_longer(
+    cols = starts_with("Index"), # Select columns that start with "Index"
+    names_to = c(".value", "Orientation"), # Pivot into two columns: "Index name" and "Index sequence"
+    names_pattern = "Index (name|sequence) (FWD|REV)" # Separate by "name" or "sequence", and by direction
+  ) %>% 
+  BiocGenerics::unique() %>% 
+  dplyr::select(-c("Orientation")) %>% 
+  dplyr::mutate("sequence" = stringr::str_remove_all(sequence,pattern = "^NNNN|^NNN|^NN|^N")) %>% 
+  dplyr::mutate(name = stringr::str_replace(pattern = "^",replacement = ">",name)) %>% 
+  # tidyr::unite(col = "name", name, Primer, sep = "__",remove = F) %>% 
+  dplyr::arrange(name)
+    
+
+#diminuindo os primers para apena 16 bases para a demultiplexação ----
+
+#opcionalmente, é possível utilizar apenas o Index na demultiplexação. Usualmente eu utilizo o index mais o primer inteiro ou então apenas uma parte à 5', logo após o index. Nem sempre sequencias menores retornam mais reads.
+            ####opcional#####
+dmux_indexes <- dmux_indexes %>% 
+  mutate(sequence = substr(sequence,1,16))
+
+
+for (PRIMER in BiocGenerics::unique(dmux_indexes$Primer)) {
+  
+  dmux_indexes_primer <- dmux_indexes %>%  
+    dplyr::filter(Primer %in% c(PRIMER))
+  
+  #write fasta file with ASVs and Taxonomy
+  all_indexes_fasta <- c(rbind(dmux_indexes_primer$name, dmux_indexes_primer$sequence))
+  
+  write(all_indexes_fasta,file =  paste0(dmx_path,"/",PRIMER,"--all_indexes.fasta"))
+  
+  paste0("Your demultiplexing indexes were written to:\n", dmx_path,"/",PRIMER,"--all_indexes.fasta") %>% 
+    message()
+  
+  dir.create(path = paste0(dmx_path,"/all_dmx/",PRIMER),
+             showWarnings = T)
+  dir.create(path = paste0(dmx_path,"/all_combined/",PRIMER),
+             showWarnings = T)
+  
+}
+
+```
+### Demultiplex with cutadapt
+
+This must be performed on linux command line (_bash_). This part is structured to work with _Combinatorial Dual Indexes_ (all possible orientations). If you have any doubt, please refer to the [cutadapt manual](https://cutadapt.readthedocs.io/en/stable/guide.html#combinatorial-demultiplexing).
+
+```{bash, eval=FALSE}
+# create and move into a folder for the demultiplexed results ---- 
+mkdir ~/demultiplex/data/reads/dmx
+cd ~/demultiplex/data/reads/dmx
+
+# you must enable the creation of multiple files (sudo only) ----
+sysctl -w fs.file-max=100000
+#https://www.cyberciti.biz/faq/linux-increase-the-maximum-number-of-open-files/
+
+# you must enable multiple processes on parallel (sudo only) ----
+ulimit -n 1000000
+
+# MiBird ----
+cutadapt \
+ -e 0 \
+  -j 60 \
+   --no-indels \
+    --max-n 0 \
+ --discard-untrimmed \
+ --action=retain \
+ -g file:/home/heron/prjcts/2025/demultiplex/data/reads/dmx/MiBird--all_indexes.fasta \
+ -G file:/home/heron/prjcts/2025/demultiplex/data/reads/dmx/MiBird--all_indexes.fasta \
+ -o /home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_dmx/MiBird/{name1}-{name2}.R1.fastq.gz \
+ -p /home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_dmx/MiBird/{name1}-{name2}.R2.fastq.gz \
+   /data/data_raw/ecomol/2025/Projeto/prj001_analise001_MiBird/raw/prj001_analise001_MiBird_R1_001.fastq.gz \ 
+   /data/data_raw/ecomol/2025/Projeto/prj001_analise001_MiBird/raw/prj001_analise001_MiBird_R2_001.fastq.gz \ 
+ 2> /home/heron/prjcts/2025/demultiplex/data/reads/dmx/demultiplex--23mai25---dmx_cut_e00_noNs_MiBird.txt;
+
+
+```
+
+
+
+### Combine demultiplexed FWD and REV files into single R1 & R2 pair 
+
+```{r, eval=FALSE,echo=TRUE}
+library("Rfastp")
+
+for (PRIMER in BiocGenerics::unique(dmux_indexes$Primer)) {
+  
+  dmux_files <- list.files(paste0(dmx_path,"/all_dmx/",PRIMER),full.names = T)
+  
+  dmux_combined_folder <- paste0(dmx_path,"/all_combined/",PRIMER)
+  
+  dmux_idxs <- primers_n_samples %>% 
+    dplyr::filter(!is.na(`Index name FWD`)) %>% 
+    dplyr::filter(Primer %in% c(PRIMER)) %>% 
+    dplyr::mutate("FWD rad R1" = paste(`Index name FWD`, "-", `Index name REV`, ".R1.",sep = ""),
+                  "FWD rad R2" = paste(`Index name FWD`, "-", `Index name REV`, ".R2.",sep = ""),
+                  "REV rad R1" = paste(`Index name REV`, "-", `Index name FWD`, ".R1.",sep = ""),
+                  "REV rad R2" = paste(`Index name REV`, "-", `Index name FWD`, ".R2.",sep = "")
+                  ) %>% 
+    dplyr::group_by(Unique_File_name) %>% 
+    dplyr::mutate("FWD file R1" = grep(pattern = `FWD rad R1`, x = dmux_files, value = T),
+                  "FWD file R2" = grep(pattern = `FWD rad R2`, x = dmux_files, value = T),
+                  "REV file R1" = grep(pattern = `REV rad R1`, x = dmux_files, value = T),
+                  "REV file R2" = grep(pattern = `REV rad R2`, x = dmux_files, value = T)) %>% 
+    dplyr::mutate("Combined R1" = paste0(dmux_combined_folder,"/",Unique_File_name,"__R1.fastq.gz"),
+           "Combined R2" = paste0(dmux_combined_folder,"/",Unique_File_name,"__R2.fastq.gz")) %>% 
+    dplyr::ungroup()
+  
+    for (sample in 1:nrow(dmux_idxs)) {
+      
+      print(paste0("Working on sample ",dmux_idxs$Unique_File_name[sample] ))
+      
+      Rfastp::catfastq(output = dmux_idxs$`Combined R1`[sample],
+                       inputFiles = c(dmux_idxs$`FWD file R1`[sample],
+                                      dmux_idxs$`REV file R1`[sample]))
+      
+      Rfastp::catfastq(output = dmux_idxs$`Combined R2`[sample],
+                       inputFiles = c(dmux_idxs$`FWD file R2`[sample],
+                                      dmux_idxs$`REV file R2`[sample]))
+    }
+  }
+
+# ----
+# see proportion of demultiplexed reads ----
+
+my_primers <- c(
+  "MiBird"
+  # "MiFish"
+  # "p12SBatra",
+  # "p12SV5",
+  # "p16SMam1",
+  # "Reptile",
+  # "COI_FWh"
+  )
+
+
+for (PRIMER in my_primers) {
+
+  message(paste0("\n\tPrimer\t ",PRIMER))
+  
+  raw_size <- fs::dir_info(paste0("/data/data_raw/ecomol/Projeto/prj001_analise001_MiBird/raw/"),)$size %>% sum() 
+  message(paste0("\nRaw size:\t", round(units::set_units(raw_size, MB),digits = 2), " MB")) 
+  
+  raw_reads <- (ShortRead::countFastq(dirPath = paste0("/data/data_raw/ecomol/Projeto/prj001_analise001_MiBird/raw/"))$records %>% sum())/2
+  message(paste0("\nRaw reads:\t", raw_reads))
+  
+  dmx_size <- fs::dir_info(paste0("/home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_combined",PRIMER))$size %>% sum()
+  message(paste0("\nDmx size:\t", round(units::set_units(dmx_size, MB),digits = 2), " MB"))
+  
+  dmx_reads <- (ShortRead::countFastq(dirPath = paste0("/home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_combined",PRIMER))$records %>% sum())/2
+  message(paste0("\nDmx reads:\t", dmx_reads))
+  
+  message(paste0("\nPercentage (reads):\t",round((dmx_reads/raw_reads*100),digits = 4)," %"))
+  message(paste0("\nPercentage (bytes):\t",round((dmx_size/raw_size*100),digits = 4)," %"))
+  
+}
+
+
+```
+
+### Plot demultiplexed reads per sample
+
+```{r, eval=FALSE,echo=TRUE}
+dmux_idxs_size <- dmux_idxs %>%
+  dplyr::rowwise() %>% 
+  dplyr::mutate("Num. reads R1" =  ShortRead::countFastq( dirPath = paste0("/home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_combined/",
+                                                                        PRIMER,"/",Unique_File_name,"__R1.fastq.gz"))$records %>% sum(),
+                "Num. reads R2" =  ShortRead::countFastq( dirPath = paste0("/home/heron/prjcts/2025/demultiplex/data/reads/dmx/all_combined/",
+                                                                        PRIMER,"/",Unique_File_name,"__R2.fastq.gz"))$records %>% sum(),) %>% 
+  dplyr::mutate("Num. reads pairs" = sum(`Num. reads R1`, `Num. reads R2`)/2)
+
+
+dmux_idxs_size %>% 
+  ggplot(aes(x = `Num. reads pairs`,
+             y = interaction(`Nome de amostra`,Unique_File_name))) +
+  geom_bar(stat = "identity") +
+  scale_x_continuous(breaks = c(0,10000,25000,50000,100000,200000,300000,400000))+
+  geom_vline(xintercept = 50000) +
+  geom_vline(xintercept = 25000,linetype = "dashed") +
+  geom_vline(xintercept = 10000,linetype = "dotted") 
+```
+
