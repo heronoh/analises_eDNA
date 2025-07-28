@@ -211,6 +211,8 @@ for (PRIMER in BiocGenerics::unique(dmux_indexes$Primer)) {
 
 This must be performed on linux command line (_bash_). This part is structured to work with _Combinatorial Dual Indexes_ (all possible orientations). If you have any doubt, please refer to the [cutadapt manual](https://cutadapt.readthedocs.io/en/stable/guide.html#combinatorial-demultiplexing).
 
+Pay close attention to the parameter -O (--overlap) cause it can lead to wrongful demultiplexing.
+
 ```{bash, eval=FALSE}
 # create and move into a folder for the demultiplexed results ---- 
 mkdir ~/demultiplex/data/reads/dmx
@@ -226,9 +228,10 @@ ulimit -n 1000000
 # MiBird ----
 cutadapt \
  -e 0 \
-  -j 60 \
+   -j 60 \
    --no-indels \
-    --max-n 0 \
+   --max-n 0 \
+   -O 9 \
  --discard-untrimmed \
  --action=retain \
  -g file:/home/heron/prjcts/2025/demultiplex/data/reads/dmx/MiBird--all_indexes.fasta \
@@ -304,7 +307,7 @@ for (PRIMER in my_primers) {
 
   message(paste0("\n\tPrimer\t ",PRIMER))
   
-  raw_size <- fs::dir_info(paste0("/data/data_raw/ecomol/Projeto/prj001_analise001_MiBird/raw/"),)$size %>% sum() 
+  raw_size <- fs::dir_info(paste0("/data/data_raw/ecomol/Projeto/prj001_analise001_MiBird/raw"),)$size %>% sum() 
   message(paste0("\nRaw size:\t", round(units::set_units(raw_size, MB),digits = 2), " MB")) 
   
   raw_reads <- (ShortRead::countFastq(dirPath = paste0("/data/data_raw/ecomol/Projeto/prj001_analise001_MiBird/raw/"))$records %>% sum())/2
